@@ -17,3 +17,13 @@ This is a work in progress, if you find a mistake, please [file an issue](https:
 * A text editor
 * Basic knowledge of HTML, CSS and JavaScript
 * (Optional) Node is required in the last step to deploy to Firebase
+
+## Notes
+
+For my solution I did some of the "Extra Credit" items such as;
+
+* Swapped localStorage solution with localForage lib (Minified)
+* Inlined CSS
+* Minified app.js (app.min.js)
+
+**Everything else remains as per the original lab provided by Google. This repo only exists to document my solution**
