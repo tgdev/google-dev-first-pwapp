@@ -119,9 +119,7 @@
     if (cardLastUpdated) {
       cardLastUpdated = new Date(cardLastUpdated);
       // Bail if the card has more recent data then the data
-      if (dataLastUpdated.getTime() < cardLastUpdated.getTime()) {
-        return;
-      }
+      if (dataLastUpdated.getTime() < cardLastUpdated.getTime()) return;
     }
     cardLastUpdatedElem.textContent = data.created;
 
@@ -179,7 +177,29 @@
     var statement = 'select * from weather.forecast where woeid=' + key;
     var url = 'https://query.yahooapis.com/v1/public/yql?format=json&q=' +
         statement;
-    // TODO add cache logic here
+
+    if ('caches' in window) {
+      /*
+       * Check if the service worker has already cached this city's weather
+       * data. If the service worker has the data, then display the cached
+       * data while the app fetches the latest data.
+       */
+      caches.match(url)
+        .then(function(response) {
+          if (response) {
+              response.json()
+                .then(function updateFromCache(json) {
+                  var results = json.query.results;
+
+                  results.key = key;
+                  results.label = label;
+                  results.created = json.query.created;
+
+                  app.updateForecastCard(results);
+                });
+          }
+        });
+    }
 
     // Fetch the latest data.
     var request = new XMLHttpRequest();
@@ -328,8 +348,6 @@
       }
     }
   };
-  // TODO uncomment line below to test app with fake data
-  // app.updateForecastCard(initialWeatherForecast);
 
   /************************************************************************
    *
@@ -342,11 +360,11 @@
    *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
    ************************************************************************/
   localforage.getItem('selectedCities')
-    .then(function(data) {
+    .then(data => {
       // This code runs once the data has been loaded from the offline store.
       if (data) {
         app.selectedCities = data;
-        app.selectedCities.forEach(function(city) {
+        app.selectedCities.forEach(city => {
           app.getForecast(city.key, city.label);
         });
       } else {
@@ -363,7 +381,7 @@
          app.saveSelectedCities();
       }
     })
-    .catch(function(err) {
+    .catch(err => {
       // This code runs if there were any errors
       console.error(err);
     });
@@ -372,10 +390,9 @@
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
       .register('./service-worker.js')
-      .then(function() {
-        console.log('Service worker registered');
+      .then(() => {
+        console.log('[ServiceWorker] Registered');
       });
   }
-
 
 })();
