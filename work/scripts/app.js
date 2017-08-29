@@ -1,11 +1,11 @@
 // Copyright 2016 Google Inc.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //      http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,17 @@
     addDialog: document.querySelector('.dialog-container'),
     daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   };
+
+  // Config for localForage
+  // https://localforage.github.io/localForage/
+  // https://github.com/localForage/localForage
+
+  localforage.config({
+    name        : 'myFirstPWA',
+    version     : 1.0,
+    // storeName   : 'keyvaluepairs',
+    description : 'storage for the google dev weather PWA'
+  });
 
 
   /*****************************************************************************
@@ -50,9 +61,12 @@
     var selected = select.options[select.selectedIndex];
     var key = selected.value;
     var label = selected.textContent;
-    // TODO init the app.selectedCities array here
+    if (!app.selectedCities) {
+      app.selectedCities = [];
+    }
     app.getForecast(key, label);
-    // TODO push the selected city to the array and save here
+    app.selectedCities.push({key: key, label: label});
+    app.saveSelectedCities();
     app.toggleAddDialog(false);
   });
 
@@ -196,7 +210,19 @@
     });
   };
 
-  // TODO add saveSelectedCities function here
+  // Save a list of cities to indexDb/localStorage (fallback)
+  app.saveSelectedCities = function() {
+    // var selectedCities = JSON.stringify(app.selectedCities);
+    localforage.setItem('selectedCities', app.selectedCities)
+      .then(function () {
+        // return localforage.getItem('selectedCities');
+        console.log('Saved cities to device storage!');
+      })
+      .catch(function (err) {
+        // we got an error
+        console.error(err);
+      });
+  };
 
   app.getIconClass = function(weatherCode) {
     // Weather codes: https://developer.yahoo.com/weather/documentation.html#codes
@@ -303,9 +329,53 @@
     }
   };
   // TODO uncomment line below to test app with fake data
-  //app.updateForecastCard(initialWeatherForecast);
+  // app.updateForecastCard(initialWeatherForecast);
 
-  // TODO add startup code here
+  /************************************************************************
+   *
+   * Code required to start the app
+   *
+   * NOTE: To simplify this codelab, we've used localStorage.
+   *   localStorage is a synchronous API and has serious performance
+   *   implications. It should not be used in production applications!
+   *   Instead, check out IDB (https://www.npmjs.com/package/idb) or
+   *   SimpleDB (https://gist.github.com/inexorabletash/c8069c042b734519680c)
+   ************************************************************************/
+  localforage.getItem('selectedCities')
+    .then(function(data) {
+      // This code runs once the data has been loaded from the offline store.
+      if (data) {
+        app.selectedCities = data;
+        app.selectedCities.forEach(function(city) {
+          app.getForecast(city.key, city.label);
+        });
+      } else {
+        /* The user is using the app for the first time, or the user has not
+         * saved any cities, so show the user some fake data. A real app in this
+         * scenario could guess the user's location via IP lookup and then inject
+         * that data into the page.
+         */
+         app.updateForecastCard(initialWeatherForecast);
+         app.selectedCities = [{
+           key: initialWeatherForecast.key,
+           label: initialWeatherForecast.label
+         }];
+         app.saveSelectedCities();
+      }
+    })
+    .catch(function(err) {
+      // This code runs if there were any errors
+      console.error(err);
+    });
 
-  // TODO add service worker code here
+  // Register the service worker if browser supports it
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+      .register('./service-woker.js')
+      .then(function() {
+        console.log('Service worker registered');
+      });
+  }
+
+
 })();
