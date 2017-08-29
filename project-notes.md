@@ -3,8 +3,8 @@
 A hybrid of native apps (from an app store) and web pages/content.
 
 - App shell
-- Web Manifest
 - Service workers
+- Web Manifest
 
 ## App shell
 
@@ -28,3 +28,18 @@ When using service workers;
 
 1. Tell the browser to register the JavaScript file as the service worker.
 2. Create a JavaScript file containing the service worker.
+
+## Manifest.json file
+
+The web app manifest is a simple JSON file that gives the developer;
+
+1. The ability to control how your app appears to the user in the areas that they would expect to see apps (for example the mobile home screen)
+2. Direct what the user can launch and more importantly how they can launch it.
+
+Using a manifest.json file you PWA can;
+
+* Have a rich presence on the user's Android home screen
+* Be launched in full-screen mode on Android with no URL bar
+* Control the screen orientation for optimal viewing
+* Define a "splash screen" launch experience and theme color for the site
+* Track whether you're launched from the home screen or URL bar

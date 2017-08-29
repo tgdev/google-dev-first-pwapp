@@ -1,11 +1,10 @@
 // app cache
-const cacheName = 'weatherPWA-v2'; // This should be updated after each change
+const cacheName = 'weatherPWA-v5'; // This should be updated after each change
 let filesToCache = [
   '/',
   '/index.html',
-  '/scripts/app.js',
+  '/scripts/app.min.js',
   '/scripts/localForage.min.js',
-  '/styles/inline.css',
   '/images/clear.png',
   '/images/cloudy-scattered-showers.png',
   '/images/cloudy.png',
@@ -32,6 +31,9 @@ self.addEventListener('install', e => {
       .then(cache => {
         console.log('[ServiceWorker] Caching app shell');
         return cache.addAll(filesToCache);
+      })
+      .catch(err => {
+        console.log('[ServiceWorker] App cache failed!');
       })
   );
 
@@ -78,7 +80,13 @@ self.addEventListener('fetch', e => {
             .then(response => {
               cache.put(e.request.url, response.clone());
               return response;
+            })
+            .catch(err => {
+              console.log('[ServiceWorker] API Fetch failed! Potentially offline.');
             });
+        })
+        .catch(err => {
+          console.log('[ServiceWorker] Data Cache failed! Potentially offline.');
         })
     );
   } else {
@@ -88,7 +96,11 @@ self.addEventListener('fetch', e => {
      * https://jakearchibald.com/2014/offline-cookbook/#cache-falling-back-to-network
      */
     e.respondWith(
-      caches.match(e.request).then(response => response || fetch(e.request))
+      caches.match(e.request)
+        .then(response => response || fetch(e.request))
+        .catch(err => {
+          console.log('[ServiceWorker] App Cache failed! Potentially offline.');
+        })
     );
   }
 });

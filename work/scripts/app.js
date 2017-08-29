@@ -240,7 +240,7 @@
       })
       .catch(function (err) {
         // we got an error
-        console.error(err);
+        console.log(`Error saving cities: ${err.message}`);
       });
   };
 
@@ -382,8 +382,7 @@
       }
     })
     .catch(err => {
-      // This code runs if there were any errors
-      console.error(err);
+      console.log(`Error retrieving cities from device storage: ${err.message}`);
     });
 
   // Register the service worker if browser supports it
