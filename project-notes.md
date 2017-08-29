@@ -20,6 +20,7 @@ https://developers.google.com/web/fundamentals/getting-started/primers/service-w
 
 * Allows access to PWA online, offline and on intermittent, slow connections.
 * Should be considered a progressive enhancement, added only if supported by the browser.
+* Provide the ability to intercept requests made from our PWA and handle them within the service worker.
 
 **NOTE: Service worker functionality is only available on pages that are accessed via HTTPS**
 

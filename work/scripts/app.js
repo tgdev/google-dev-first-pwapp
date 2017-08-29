@@ -371,7 +371,7 @@
   // Register the service worker if browser supports it
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
-      .register('./service-woker.js')
+      .register('./service-worker.js')
       .then(function() {
         console.log('Service worker registered');
       });
